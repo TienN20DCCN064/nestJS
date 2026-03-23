@@ -3,16 +3,26 @@ const saltRounds = 10;
 
 export const hashPasswordHelper = async (plainPassword: string) => {
     try {
-        return await bcrypt.hash(plainPassword, saltRounds);
+        // Lưu thẳng text password nếu muốn không mã hóa.
+        return plainPassword;
     } catch (error) {
-        console.log(error)
+        console.log(error);
     }
 }
 
-export const comparePasswordHelper = async (plainPassword: string, hashPassword: string) => {
+export const comparePasswordHelper = async (plainPassword: string, storedPassword: string) => {
     try {
-        return await bcrypt.compare(plainPassword, hashPassword);
+        if (!storedPassword) return false;
+
+        // Nếu password lưu cũ dạng bcrypt hash còn dùng được
+        if (typeof storedPassword === 'string' && storedPassword.startsWith('$2')) {
+            return await bcrypt.compare(plainPassword, storedPassword);
+        }
+
+        // So sánh thẳng với password đang lưu bình thường
+        return plainPassword === storedPassword;
     } catch (error) {
-        console.log(error)
+        console.log(error);
+        return false;
     }
 }

@@ -15,9 +15,12 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
         if (!user) {
             throw new UnauthorizedException("Username/Password không hợp lệ.");
         }
-        if (user.isActive === false) {
-            throw new BadRequestException("Tài khoản chưa được kích hoạt");
-        }
+
+        // Yêu cầu: không cần bật kích hoạt, chỉ cần username + password đúng
+        // if (user.isActive === false) {
+        //     throw new BadRequestException("Tài khoản chưa được kích hoạt");
+        // }
+
         return user;
     }
 }
