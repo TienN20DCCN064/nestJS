@@ -12,6 +12,15 @@ export class PagesService {
   ) {}
 
   async create(createPageDto: CreatePageDto) {
+    // Nếu đã có slug thì update, chưa có thì tạo mới
+    const existing = await this.pageModel.findOne({ slug: createPageDto.slug });
+    if (existing) {
+      return this.pageModel.findOneAndUpdate(
+        { slug: createPageDto.slug },
+        createPageDto,
+        { new: true }
+      );
+    }
     return this.pageModel.create(createPageDto);
   }
 
