@@ -13,17 +13,32 @@ export class PagesController {
     return this.pagesService.create(createPageDto);
   }
 
+  @Public()
   @Get()
-  findAll() {
-    return this.pagesService.findAll();
+  findAll(@Query('published') published?: string) {
+    const isGuest = published === 'true';
+    return this.pagesService.findAll(isGuest);
   }
 
   @Public()
   @Get('slug/:slug')
-  findBySlug(@Param('slug') slug: string) {
-    return this.pagesService.findBySlug(slug);
+  async findBySlug(@Param('slug') slug: string, @Query('published') published?: string) {
+    const isGuest = published === 'true';
+    const page = await this.pagesService.findBySlug(slug, isGuest);
+    if (!page) return null;
+    return page;
   }
 
+  @Public()
+  @Get('type/:type')
+  async findByType(@Param('type') type: string, @Query('published') published?: string) {
+    const isGuest = published === 'true';
+    const page = await this.pagesService.findByType(type, isGuest);
+    if (!page) return null;
+    return page;
+  }
+
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.pagesService.findOne(id);

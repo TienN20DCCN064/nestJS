@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsMongoId, IsBoolean, IsDate } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsDate, IsNumber } from 'class-validator';
 
 export class CreatePostDto {
   @IsString()
@@ -16,10 +16,19 @@ export class CreatePostDto {
 
   @IsOptional()
   @IsString()
+  author?: string;
+
+  @IsOptional()
+  @IsString()
   thumbnail?: string;
 
-  @IsMongoId()
-  categoryId: string;
+  @IsOptional()
+  @IsString()
+  type?: string;
+
+  @IsOptional()
+  @IsNumber()
+  categoryId?: number;
 
   @IsOptional()
   @IsBoolean()

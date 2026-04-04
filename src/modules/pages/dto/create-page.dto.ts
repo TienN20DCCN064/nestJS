@@ -1,6 +1,10 @@
 import { IsString, IsOptional, IsBoolean } from 'class-validator';
 
 export class CreatePageDto {
+  @IsOptional()
+  @IsString()
+  type?: string;
+
   @IsString()
   title: string;
 
@@ -12,7 +16,7 @@ export class CreatePageDto {
 
   @IsOptional()
   @IsString()
-  thumbnail?: string;
+  image?: string;
 
   @IsOptional()
   @IsBoolean()

@@ -9,7 +9,6 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  @Roles('ADMIN')
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoriesService.create(createCategoryDto);
   }
@@ -33,7 +32,6 @@ export class CategoriesController {
   }
 
   @Patch(':id')
-  @Roles('ADMIN')
   update(
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
@@ -42,7 +40,6 @@ export class CategoriesController {
   }
 
   @Delete(':id')
-  @Roles('ADMIN')
   remove(@Param('id') id: string) {
     return this.categoriesService.remove(id);
   }

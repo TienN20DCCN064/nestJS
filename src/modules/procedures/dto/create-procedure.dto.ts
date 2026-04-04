@@ -8,9 +8,12 @@ export class CreateProcedureDto {
   @IsString()
   description?: string;
 
+  @IsString()
+  content: string;
+
   @IsOptional()
-  @IsArray()
-  requiredDocuments?: string[];
+  @IsString()
+  requiredDocuments?: string;
 
   @IsOptional()
   @IsString()
@@ -23,4 +26,12 @@ export class CreateProcedureDto {
   @IsOptional()
   @IsString()
   formUrl?: string;
+
+  @IsOptional()
+  @IsArray()
+  steps?: { title: string; detail: string }[];
+
+  @IsOptional()
+  @IsString()
+  thumbnail?: string;
 }

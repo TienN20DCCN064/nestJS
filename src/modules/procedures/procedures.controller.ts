@@ -9,7 +9,6 @@ export class ProceduresController {
   constructor(private readonly proceduresService: ProceduresService) {}
 
   @Post()
-  @Roles('ADMIN')
   create(@Body() createProcedureDto: CreateProcedureDto) {
     return this.proceduresService.create(createProcedureDto);
   }
@@ -20,6 +19,12 @@ export class ProceduresController {
     return this.proceduresService.findAll(+skip, +limit);
   }
 
+  @Get('count')
+  @Public()
+  count() {
+    return this.proceduresService.count();
+  }
+
   @Get(':id')
   @Public()
   findOne(@Param('id') id: string) {
@@ -27,13 +32,11 @@ export class ProceduresController {
   }
 
   @Patch(':id')
-  @Roles('ADMIN')
   update(@Param('id') id: string, @Body() updateProcedureDto: UpdateProcedureDto) {
     return this.proceduresService.update(id, updateProcedureDto);
   }
 
   @Delete(':id')
-  @Roles('ADMIN')
   remove(@Param('id') id: string) {
     return this.proceduresService.remove(id);
   }

@@ -15,14 +15,25 @@ export class PostsController {
 
   @Public()
   @Get()
-  findAll(@Query('skip') skip = 0, @Query('limit') limit = 10) {
-    return this.postsService.findAll(+skip, +limit);
+  findAll(
+    @Query('skip') skip = 0,
+    @Query('limit') limit = 10,
+    @Query('type') type?: string,
+    @Query('status') status?: string,
+  ) {
+    return this.postsService.findAll(+skip, +limit, type, status);
   }
 
   @Public()
   @Get('featured')
   findFeatured() {
     return this.postsService.findFeatured();
+  }
+
+  @Public()
+  @Get('count')
+  count(@Query('type') type?: string) {
+    return this.postsService.count(type);
   }
 
   @Public()

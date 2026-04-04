@@ -1,13 +1,11 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProceduresService } from './procedures.service';
 import { ProceduresController } from './procedures.controller';
-import { Procedure, ProcedureSchema } from './schemas/procedure.schema';
+import { Procedure } from './entities/procedure.entity';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: Procedure.name, schema: ProcedureSchema }]),
-  ],
+  imports: [TypeOrmModule.forFeature([Procedure])],
   controllers: [ProceduresController],
   providers: [ProceduresService],
   exports: [ProceduresService],

@@ -1,50 +1,70 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Page, PageDocument } from './schemas/page.schema';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Page } from './entities/page.entity';
 import { CreatePageDto } from './dto/create-page.dto';
 import { UpdatePageDto } from './dto/update-page.dto';
 
 @Injectable()
 export class PagesService {
   constructor(
-    @InjectModel(Page.name) private pageModel: Model<PageDocument>,
+    @InjectRepository(Page)
+    private pageRepository: Repository<Page>,
   ) {}
 
   async create(createPageDto: CreatePageDto) {
-    // Nếu đã có slug thì update, chưa có thì tạo mới
-    const existing = await this.pageModel.findOne({ slug: createPageDto.slug });
+    const existing = await this.pageRepository.findOneBy({ slug: createPageDto.slug });
     if (existing) {
-      return this.pageModel.findOneAndUpdate(
-        { slug: createPageDto.slug },
-        createPageDto,
-        { new: true }
-      );
+      await this.pageRepository.update(existing.id, createPageDto as any);
+      return this.pageRepository.findOneBy({ id: existing.id });
     }
-    return this.pageModel.create(createPageDto);
+    const page = this.pageRepository.create(createPageDto as any);
+    return this.pageRepository.save(page);
   }
 
-  async findAll() {
-    return this.pageModel.find({ isPublished: true });
+  async findAll(onlyPublished = false) {
+    if (onlyPublished) {
+      return this.pageRepository.find({ where: { isPublished: true } });
+    }
+    return this.pageRepository.find();
   }
 
   async findOne(id: string) {
-    return this.pageModel.findById(id);
+    return this.pageRepository.findOneBy({ id: parseInt(id, 10) });
   }
 
-  async findBySlug(slug: string) {
-    return this.pageModel.findOne({ slug });
+  async findBySlug(slug: string, onlyPublished = false) {
+    if (onlyPublished) {
+      return this.pageRepository.findOneBy({ slug, isPublished: true });
+    }
+    return this.pageRepository.findOneBy({ slug });
+  }
+
+  async findByType(type: string, onlyPublished = false) {
+    const where: any = { type };
+    if (onlyPublished) {
+      where.isPublished = true;
+    }
+    return this.pageRepository.findOneBy(where);
   }
 
   async update(id: string, updatePageDto: UpdatePageDto) {
-    return this.pageModel.findByIdAndUpdate(id, updatePageDto, { new: true });
+    const pageId = parseInt(id, 10);
+    await this.pageRepository.update(pageId, updatePageDto as any);
+    return this.pageRepository.findOneBy({ id: pageId });
   }
 
   async updateBySlug(slug: string, updatePageDto: UpdatePageDto) {
-    return this.pageModel.findOneAndUpdate({ slug }, updatePageDto, { new: true, upsert: false });
+    const existing = await this.pageRepository.findOneBy({ slug });
+    if (!existing) {
+      return null;
+    }
+    await this.pageRepository.update(existing.id, updatePageDto as any);
+    return this.pageRepository.findOneBy({ id: existing.id });
   }
 
   async remove(id: string) {
-    return this.pageModel.findByIdAndDelete(id);
+    const result = await this.pageRepository.delete(parseInt(id, 10));
+    return result;
   }
 }

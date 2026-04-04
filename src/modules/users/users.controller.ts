@@ -31,6 +31,11 @@ export class UsersController {
     return this.usersService.update(updateUserDto);
   }
 
+  @Patch(':id')
+  updateById(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update({ ...updateUserDto, id: parseInt(id, 10) });
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string): Promise<{ acknowledged: boolean; deletedCount?: number }> {
     return this.usersService.remove(id);

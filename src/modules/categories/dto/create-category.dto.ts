@@ -7,6 +7,11 @@ export class CreateCategoryDto {
   @IsString()
   slug: string;
 
-  @IsEnum(['news', 'document', 'procedure'])
-  type: string;
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsString()
+  type?: string;
 }

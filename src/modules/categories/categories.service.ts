@@ -1,39 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Category, CategoryDocument } from './schemas/category.schema';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Category } from './entities/category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoriesService {
   constructor(
-    @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
-    return this.categoryModel.create(createCategoryDto);
+    const category = this.categoryRepository.create(createCategoryDto);
+    return await this.categoryRepository.save(category);
   }
 
   async findAll() {
-    return this.categoryModel.find();
-  }
-
-  async findOne(id: string) {
-    return this.categoryModel.findById(id);
+    return this.categoryRepository.find();
   }
 
   async findByType(type: string) {
-    return this.categoryModel.find({ type });
+    return this.categoryRepository.find({ where: { type } as any });
+  }
+
+  async findOne(id: string) {
+    return this.categoryRepository.findOneBy({ id: parseInt(id, 10) });
   }
 
   async update(id: string, updateCategoryDto: UpdateCategoryDto) {
-    return this.categoryModel.findByIdAndUpdate(id, updateCategoryDto, {
-      new: true,
-    });
+    const categoryId = parseInt(id, 10);
+    await this.categoryRepository.update(categoryId, updateCategoryDto);
+    return this.categoryRepository.findOneBy({ id: categoryId });
   }
 
   async remove(id: string) {
-    return this.categoryModel.findByIdAndDelete(id);
+    return this.categoryRepository.delete(parseInt(id, 10));
   }
 }

@@ -1,52 +1,80 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Post, PostDocument } from './schemas/post.schema';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Post } from './entities/post.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 
 @Injectable()
 export class PostsService {
   constructor(
-    @InjectModel(Post.name) private postModel: Model<PostDocument>,
+    @InjectRepository(Post)
+    private postRepository: Repository<Post>,
   ) {}
 
   async create(createPostDto: CreatePostDto) {
-    return this.postModel.create(createPostDto);
+    const post = this.postRepository.create(createPostDto as any);
+    return await this.postRepository.save(post);
   }
 
-  async findAll(skip = 0, limit = 10) {
-    return this.postModel
-      .find({ isPublished: true })
-      .sort({ publishedAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate('categoryId');
+  async findAll(skip = 0, limit = 10, type?: string, status?: string) {
+    const where: any = {};
+    if (status === 'all') {
+      // No filter on isPublished
+    } else if (status === 'draft') {
+      where.isPublished = false;
+    } else {
+      where.isPublished = true; // default
+    }
+
+    if (type) {
+      where.type = type;
+    }
+    return this.postRepository.find({
+      where,
+      order: { publishedAt: 'DESC' },
+      skip,
+      take: limit,
+    });
   }
 
   async findOne(id: string) {
-    return this.postModel.findById(id).populate('categoryId');
+    return this.postRepository.findOneBy({ id: parseInt(id, 10) });
   }
 
   async findBySlug(slug: string) {
-    return this.postModel.findOne({ slug }).populate('categoryId');
+    return this.postRepository.findOneBy({ slug });
   }
 
   async findByCategory(categoryId: string) {
-    return this.postModel.find({ categoryId, isPublished: true });
+    return this.postRepository.find({
+      where: { categoryId: parseInt(categoryId, 10), isPublished: true },
+    });
   }
 
   async findFeatured(limit = 5) {
-    return this.postModel
-      .find({ isFeatured: true, isPublished: true })
-      .limit(limit);
+    return this.postRepository.find({
+      where: { isFeatured: true, isPublished: true },
+      take: limit,
+    });
   }
 
   async update(id: string, updatePostDto: UpdatePostDto) {
-    return this.postModel.findByIdAndUpdate(id, updatePostDto, { new: true });
+    const postId = parseInt(id, 10);
+    await this.postRepository.update(postId, updatePostDto as any);
+    return this.postRepository.findOneBy({ id: postId });
+  }
+
+  async count(type?: string) {
+    const where: any = { isPublished: true };
+    if (type) {
+      where.type = type;
+    }
+    return this.postRepository.count({ where });
   }
 
   async remove(id: string) {
-    return this.postModel.findByIdAndDelete(id);
+    const result = await this.postRepository.delete(parseInt(id, 10));
+    return result;
   }
 }
