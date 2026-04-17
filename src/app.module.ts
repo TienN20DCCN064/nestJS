@@ -32,49 +32,66 @@ import { TransformInterceptor } from '@/core/transform.interceptor';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        console.log("DB_HOST =", configService.get('DB_HOST'));
-        console.log("DB_NAME =", configService.get('DB_DATABASE'));
-
-        return {
-          type: 'mysql',
-          host: configService.get<string>('DB_HOST'),
-          port: Number(configService.get<string>('DB_PORT')),
-          username: configService.get<string>('DB_USERNAME'),
-          password: configService.get<string>('DB_PASSWORD'),
-          database: configService.get<string>('DB_DATABASE'),
-          autoLoadEntities: true,
-          synchronize: true,
-        };
+        try {
+          console.log('--- DATABASE ENV ---');
+          console.log('DB_HOST =', configService.get('DB_HOST'));
+          console.log('DB_PORT =', configService.get('DB_PORT'));
+          console.log('DB_USERNAME =', configService.get('DB_USERNAME'));
+          console.log('DB_PASSWORD =', configService.get('DB_PASSWORD') ? '***' : undefined);
+          console.log('DB_DATABASE =', configService.get('DB_DATABASE'));
+          return {
+            type: 'mysql',
+            host: configService.get<string>('DB_HOST'),
+            port: Number(configService.get<string>('DB_PORT')),
+            username: configService.get<string>('DB_USERNAME'),
+            password: configService.get<string>('DB_PASSWORD'),
+            database: configService.get<string>('DB_DATABASE'),
+            autoLoadEntities: true,
+            synchronize: true,
+          };
+        } catch (err) {
+          console.error('TypeORM config error:', err);
+          throw err;
+        }
       },
     }),
     MailerModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        transport: {
-          host: "smtp.gmail.com",
-          port: 465,
-          secure: true,
-          // ignoreTLS: true,
-          // secure: false,
-          auth: {
-            user: configService.get<string>('MAIL_USER'),
-            pass: configService.get<string>('MAIL_PASSWORD'),
-          },
-        },
-        defaults: {
-          from: '"No Reply" <no-reply@localhost>',
-        },
-        // preview: true,
-        template: {
-          dir: process.cwd() + '/src/mail/templates/',
-          adapter: new HandlebarsAdapter(), // or new PugAdapter() or new EjsAdapter()
-          options: {
-            strict: true,
-          },
-        },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        try {
+          console.log('--- MAILER ENV ---');
+          console.log('MAIL_USER =', configService.get('MAIL_USER'));
+          console.log('MAIL_PASSWORD =', configService.get('MAIL_PASSWORD') ? '***' : undefined);
+          return {
+            transport: {
+              host: "smtp.gmail.com",
+              port: 465,
+              secure: true,
+              // ignoreTLS: true,
+              // secure: false,
+              auth: {
+                user: configService.get<string>('MAIL_USER'),
+                pass: configService.get<string>('MAIL_PASSWORD'),
+              },
+            },
+            defaults: {
+              from: '"No Reply" <no-reply@localhost>',
+            },
+            // preview: true,
+            template: {
+              dir: process.cwd() + '/src/mail/templates/',
+              adapter: new HandlebarsAdapter(), // or new PugAdapter() or new EjsAdapter()
+              options: {
+                strict: true,
+              },
+            },
+          };
+        } catch (err) {
+          console.error('Mailer config error:', err);
+          throw err;
+        }
+      },
       inject: [ConfigService],
-
     }),
   ],
   controllers: [AppController],
