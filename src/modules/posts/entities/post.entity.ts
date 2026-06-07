@@ -14,8 +14,8 @@ export class Post {
   @Column({ type: 'text', nullable: true })
   summary?: string;
 
-  @Column({ length: 100, nullable: true })
-  type?: string;
+  @Column({ type: 'enum', enum: ['news', 'announcement', 'other'] })
+  type: string;
 
   @Column({ type: 'text' })
   content: string;

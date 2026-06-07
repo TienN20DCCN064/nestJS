@@ -47,7 +47,7 @@ import { TransformInterceptor } from '@/core/transform.interceptor';
             password: configService.get<string>('DB_PASSWORD'),
             database: configService.get<string>('DB_DATABASE'),
             autoLoadEntities: true,
-            synchronize: true,
+            synchronize: false,
           };
         } catch (err) {
           console.error('TypeORM config error:', err);
